@@ -1,8 +1,10 @@
 package main
 
 import (
+	"log"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/Sirupsen/logrus"
@@ -13,16 +15,24 @@ var (
 	consumerSecret    = getEnv("TWITTER_CONSUMER_SECRET")
 	accessToken       = getEnv("TWITTER_ACCESS_TOKEN")
 	accessTokenSecret = getEnv("TWITTER_ACCESS_TOKEN_SECRET")
+	tracks            = getTracks("tracks")
 )
 
 func getEnv(name string) string {
 	v := os.Getenv(name)
 	if v == "" {
-		panic("missing required environment variable " + name)
+		log.Fatalln("env variable not exists :%v", name)
 	}
 	return v
 }
 
+func getTracks(name string) []string {
+	v := os.Getenv(name)
+	if v == "" {
+		log.Fatalln("env variable not exists :%v" + name)
+	}
+	return strings.Split(v, ",")
+}
 func main() {
 	anaconda.SetConsumerKey(consumerKey)
 	anaconda.SetConsumerSecret(consumerSecret)
@@ -33,7 +43,7 @@ func main() {
 	api.SetLogger(log)
 
 	s := api.PublicStreamFilter(url.Values{
-		"track": []string{"#amirrezaask"},
+		"track": tracks,
 	})
 	for t := range s.C {
 		twitt, ok := t.(anaconda.Tweet)
